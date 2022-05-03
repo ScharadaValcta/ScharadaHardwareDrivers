@@ -1,0 +1,59 @@
+;/*++
+;
+;Copyright (c) Atmel Corporation.  All rights reserved.
+;
+;Module Name:
+;    MxtUpdaterDxe.inf
+;
+;Abstract:
+;    INF file for installing the UEFI Capsule
+;
+;
+;--*/
+
+[Version] 
+Signature   = "$WINDOWS NT$" 
+Provider    = %Provider% 
+Class       = Firmware 
+ClassGuid   = {f2e7dd72-6468-4e36-b6f1-6488f42c1b52}
+DriverVer   = 07/23/2013,20.172.02.06 
+CatalogFile = MxtUpdaterDxe.cat 
+PnpLockdown = 1 
+ 
+[Manufacturer] 
+%MfgName% = Firmware,NTx86 
+ 
+[Firmware.NTx86] 
+%FirmwareDesc% = Firmware_Install,UEFI\RES_{7fc22be2-82be-4b26-8403-e8ac538cee9b} 
+ 
+[Firmware_Install.NT] 
+CopyFiles = Firmware_CopyFiles 
+ 
+[Firmware_CopyFiles] 
+MxtUpdaterDxe_20AC0206_20130723.efi 
+ 
+[Firmware_Install.NT.Hw] 
+AddReg = Firmware_AddReg 
+ 
+[Firmware_AddReg] 
+HKR,,FirmwareId,,{7fc22be2-82be-4b26-8403-e8ac538cee9b} 
+HKR,,FirmwareVersion,%REG_DWORD%,0x20AC0206 
+HKR,,FirmwareFilename,,{7fc22be2-82be-4b26-8403-e8ac538cee9b}\MxtUpdaterDxe_20AC0206_20130723.efi
+ 
+[SourceDisksNames] 
+1 = %DiskName% 
+ 
+[SourceDisksFiles] 
+MxtUpdaterDxe_20AC0206_20130723.efi = 1 
+ 
+[DestinationDirs] 
+DefaultDestDir = %DIRID_WINDOWS%,Firmware\{7fc22be2-82be-4b26-8403-e8ac538cee9b} 
+ 
+[Strings] 
+; localizable 
+Provider     = "Atmel, Corp." 
+MfgName      = "Atmel, Corp." 
+FirmwareDesc = "Touch Controller Firmware 20.AC.02.06" 
+DiskName     = "Firmware Update"
+DIRID_WINDOWS = 10
+REG_DWORD     = 0x00010001
