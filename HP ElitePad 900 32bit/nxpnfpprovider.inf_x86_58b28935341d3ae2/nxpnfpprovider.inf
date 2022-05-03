@@ -1,0 +1,139 @@
+;
+; NxpNfpProvider.inf
+; Copyright (c), NXP Semiconductors
+;
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = Proximity
+ClassGuid   = {5630831C-06C9-4856-B327-F5D32586E060}
+Provider    = %NXP%
+CatalogFile = nxpnfpprovider.cat
+DriverVer   = 11/05/2013,1.4.7.2
+PnpLockDown = 1
+
+[Manufacturer]
+%NXPWUDF%=Standard,NTx86
+
+[Standard.NTx86]
+%NxpNfpProviderName%=NxpNfpProvider_Install,ACPI\NXP5441
+%NxpNfpProviderName%=NxpNfpProvider_Install,ACPI\NXP6011
+
+[SourceDisksFiles]
+NxpNfpProvider.dll=1
+libpn544_C2fw.dll=1
+libpn544_C3fw.dll=1
+libpn544_NGfw.dll=1
+NxpNfcRM.dll=1
+
+[SourceDisksNames]
+1 = %MediaDescription%
+
+; =================== WUDF NxpNfpProvider Test Driver ==================================
+
+[NxpNfpProvider_Install]
+CopyFiles=UMDFDriverCopy
+AddReg=NxpNfpProviderRadioManager_AddReg
+
+[NxpNfpProvider_Install.hw]
+AddReg=NxpNfpProvider_AddReg
+
+[NxpNfpProvider_Install.Interfaces]
+AddInterface={FB3842CD-9E2A-4F83-8FCC-4B0761139AE9}, , NxpNfpProvider_AddInterface
+
+[NxpNfpProvider_Install.Services]
+AddService=WUDFRd,0x000001fa,WUDFRD_ServiceInstall
+
+[NxpNfpProvider_Install.CoInstallers]
+AddReg = NxpNfpProvider_Install.CoInstallers_AddReg
+CopyFiles = CoInstallers_CopyFiles,C2_FW_DLL.CopyFiles,C3_FW_DLL.CopyFiles,NG_FW_DLL.CopyFiles,RMComServer.CopyFiles
+
+[NxpNfpProvider_Install.CoInstallers_AddReg]
+HKR,,CoInstallers32,0x00010000,"WUDFCoinstaller.dll"
+
+[CoInstallers_CopyFiles]
+;WudfUpdate_$UMDFCOINSTALLERVERSION$.dll
+
+[NxpNfpProvider_Install.Wdf]
+UmdfService=NxpNfpProvider, NxpNfpProvider_Driver_Install
+UmdfServiceOrder=NxpNfpProvider
+UmdfDirectHardwareAccess=AllowDirectHardwareAccess
+UmdfDispatcher=FileHandle
+
+[NxpNfpProvider_AddReg]
+HKR,"NxpNfpProvider", "NfcRadioState",      	0x00010001, 0
+HKR,"NxpNfpProvider", "IdleTimeOut",        	0x00010001, 1
+HKR,"NxpNfpProvider", "IdleSettingsEnable", 	0x00010001, 0
+;HKR,"NxpNfpProvider", "SeWiredModeMifareEnable",0x00010001, 0
+HKR,"NxpNfpProvider", "ForcedDownloadEnable", 	0x00010001, 2
+HKR,"NxpNfpProvider", "PollDevInfo",        	0x00010001, 0x3F
+HKR,"NxpNfpProvider", "RF_OffTime",        	0x00010001, 0x32
+HKR,"NxpNfpProvider", "NfcIP_Mode",         	0x00010001, 0xE
+HKR,"NxpNfpProvider", "Duration",           	0x00010001, 0x7A120
+HKR,"NxpNfpProvider", "InvertVenPin",       	0x00010001, 0
+HKR,"NxpNfpProvider", "InvertGpioPin",      	0x00010001, 0
+;To suppress below reg entry and use alternative settings for customizing create 
+; reg key HKLM\SYSTEM\CurrentControlSet\NXPNFCcontroller\CustomEEConfigParms
+HKR,"NxpNfpProvider", "C2EEConfigParms",    	0x00000001, 9C,00,22,9C,01,08,9C,1A,0A,9E,74,B0,9E,7D,B0,9F,28,01
+HKR,"NxpNfpProvider", "C3EEConfigParms",    	0x00000001, 9E,74,B0,9E,90,00,9F,28,01,98,00,3F,9F,0A,01
+HKR,"NxpNfpProvider", "ControllerConfigDetails",0x00000001, 9E,74,00,9E,90,00
+HKR,"NxpNfpProvider", "LLCPConfigParams",   	0x00000001, 00,04,64,5
+HKR,"NxpNfpProvider", "SupportedUartHwIds", 	0x00010000, "USB\VID_10C4&PID_EA60&REV_0100 FTDIBUS\COMPORT&VID_0403&PID_6001 SSID/SSVID = 2AF1/103C USB\VID_0451&PID_3410&REV_0100 USB\VID_067B&PID_2303&REV_0400 {FFEC7336-10CD-41CF-BF82-5EEF9AAA1B64}\VirtualCOM USB\VID_04E2&PID_1411&REV_0001&MI_00 USB\VID_04E2&PID_1411&MI_00"
+HKR,"NxpNfpProvider", "VenGpio4Address",    	0x00010001, 0x539
+HKLM,"SYSTEM\CurrentControlSet\Control\RadioManagement\{BA0CCA99-A7A1-415C-9E5B-25C0A99DDBC3}",,,"NFC Radio Manager"
+HKLM,"SYSTEM\CurrentControlSet\Control\RadioManagement\Misc\NfcRadioManager\NfcRadio1","RadioState",0x00010001,0
+HKLM,"SYSTEM\CurrentControlSet\Control\RadioManagement\Misc\NfcRadioManager\NfcRadio1","Name",,"NFC"
+HKLM,"SYSTEM\CurrentControlSet\Control\RadioManagement\Misc\NfcRadioManager\NfcRadio1","IsMultiComm",0x00010001,0
+
+[NxpNfpProviderRadioManager_AddReg]
+HKLM,SOFTWARE\Classes\CLSID\{BA0CCA99-A7A1-415C-9E5B-25C0A99DDBC3},,,"NFC Radio Manager"
+HKLM,SOFTWARE\Classes\CLSID\{BA0CCA99-A7A1-415C-9E5B-25C0A99DDBC3}\InProcServer32,,0x00020000,"%%SystemRoot%%\system32\NxpNfcRM.dll"
+HKLM,SOFTWARE\Classes\CLSID\{BA0CCA99-A7A1-415C-9E5B-25C0A99DDBC3}\InprocServer32,ThreadingModel,,Both
+
+[NxpNfpProvider_AddInterface]
+AddProperty=NxpNfpProvider_AddInterface_AddProperty
+
+[NxpNfpProvider_AddInterface_AddProperty]
+{FB3842CD-9E2A-4F83-8FCC-4B0761139AE9}, 2, 0x2012, , "StandardNfc"
+
+[WUDFRD_ServiceInstall]
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\WUDFRd.sys
+
+[NxpNfpProvider_Driver_Install]
+UmdfLibraryVersion=1.11.0
+DriverCLSID="{278F44F0-FF5C-4FE3-BF20-F8AA158EA7BC}"
+ServiceBinary=%12%\UMDF\NxpNfpProvider.dll
+
+[DestinationDirs]
+C2_FW_DLL.CopyFiles=11
+C3_FW_DLL.CopyFiles=11
+NG_FW_DLL.CopyFiles=11
+UMDFDriverCopy=12,UMDF
+RMComServer.CopyFiles=11
+
+[C2_FW_DLL.CopyFiles]
+libpn544_C2fw.dll
+
+[C3_FW_DLL.CopyFiles]
+libpn544_C3fw.dll
+
+[NG_FW_DLL.CopyFiles]
+libpn544_NGfw.dll
+
+[UMDFDriverCopy]
+NxpNfpProvider.dll
+
+[RMComServer.CopyFiles]
+NxpNfcRM.dll
+
+; =================== Generic ==================================
+
+[Strings]
+NXP="NXP Semiconductors"
+NXPWUDF="NXP Semiconductors(Proximity)"
+MediaDescription="NXP NearField Proximity Provider Installation Media"
+NxpNfpProviderName="NXP NearFieldProximity Provider"
+

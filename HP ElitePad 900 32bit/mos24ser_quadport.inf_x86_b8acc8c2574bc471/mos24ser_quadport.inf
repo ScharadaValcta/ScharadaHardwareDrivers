@@ -1,0 +1,174 @@
+;;/*********************************************************************
+;;
+;;  MCS7840/7820/7810 - High-Speed USB MultiSerial Device Driver for 1/2/4 serial ports
+;;
+;;  Mos24Ser.inf: Installation Script for MCS7840/7820/7810 - Serial Port Device
+;;  Target OS : Windows OS 32-Bit
+;;
+;;*********************************************************************/
+
+[version]
+Signature="$WINDOWS NT$"
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318}
+Provider=%ProviderName%
+DriverVer=02/10/2014,2.0.8.0
+CatalogFile=Mos24Ser_QUADPORT.cat
+
+[DestinationDirs]
+DefaultDestDir  = 11        ;LDID_SYS
+CoClass.CoInstallers_CopyFiles=12       ;DIRID_DRIVERS
+
+[SourceDisksNames]
+2=%MosQuadPort.DiskName%,,,
+
+[SourceDisksFiles]
+;; NOTHING 
+
+;===============================
+; Driver Installation
+;===============================
+[Manufacturer]
+%MfgName%=MosQuadPortsList
+
+;
+; Manufacturer Name Section
+;
+[MosQuadPortsList]
+%MosQuadPort.ComPortName%=ComPort.NT,QUADPORT\QUAD_SERIAL_INTERFACE
+
+
+;----------------------------------------
+; COM Port Install
+;----------------------------------------
+
+[ComPort.NT]
+AddReg=ComPort.NT.AddReg
+
+[ComPort.NT.AddReg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,mos24ser_QUADPORT.sys
+
+;RegMaxTxPacketSize is valid 32 - 512K
+HKR,, "RegMaxTxPacketSize", 0x10001, 512
+
+;RegMaxTxPacketSize is valid 64 - 512K
+HKR,, "RegMaxRxPacketSize", 0x10001, 1024
+
+;RegUsbReadMaxPolls is valid 1 - 10
+HKR,, "RegUsbReadMaxPolls", 0x10001, 1
+
+;RegUsbStatusMaxPolls is valid 1 - 10
+HKR,, "RegUsbStatusMaxPolls", 0x10001, 1
+
+;RegEnableHwFlowControl is valid 0 - 1
+HKR,, "RegEnableHwFlowControl", 0x10001, 0
+
+HKR,, "DeviceControlReg0",	 0x10001, 01
+HKR,, "DeviceControlReg1",	 0x10001, 05
+HKR,, "DeviceControlReg2",	 0x10001, 36
+HKR,, "MaskBaudsLowToHigh",	 0x10001, 0
+HKR,, "WriteDCR",			 0x10001, 1
+HKR,, "ControlReg",			 0x10001, 0
+HKR,, "RS485EN",			 0x10001, 0
+HKR,, "IrDA",			 0x10001, 0
+HKR,, "DLL"	,		 0x10001, 0
+HKR,, "DLM"	,		 0x10001, 0
+HKR,, "DivisorValueToSync1200baud",0x10001, 0x5f
+HKR,, "CLK_SEL_REG",		 0x10001, 0
+HKR,, "RxSAMP",			 0x10001, 7
+HKR,, "ZLP",			 0x10001, 255
+HKR,, "ZLP_ENABLE",		 0x10001, 1
+HKR,, "THR1",			 0x10001, 0
+HKR,, "THR2",			 0x10001, 1
+HKR,, "ICG",			 0x10001, 0
+HKR,, "EN450MODE",		 0x10001, 0
+HKR,, "CUSTNAME", , %CUSTNAME%
+HKR,, "VID_PID_CUSTOMER", , %VID%"_"%PID%"_"%CUSTNAME%
+
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider"
+HKR,,EnumPropPages32,,"Mos24SerPropPage_QUADPORT.dll,MosUSBSerPropPageProvider"
+HKR,,PortSubClass,1,01
+
+[ComPort.NT.HW]
+AddReg=ComPort.NT.HW.AddReg
+
+;[ComPort.NT.Service.AddReg]
+;DebugLevel is valid 0 - 3
+;HKR,"Parameters", "DebugLevel", 0x10001, 0
+;HKR,"Parameters", "EXT_INTERRUPT_VAR", 0x10001, 0
+;HKR,"Parameters", "WaitCount", 0x10001, 0
+;HKR,"Parameters", "ClockStartReg", 0x10001, 0
+;HKR,"Parameters", "ClockMultiReg", 0x10001, 16
+;HKR,"Parameters", "PLL_N_REGs", 0x10001, 8
+;HKR,"Parameters", "PLL_M_REGs", 0x10001, 1
+;HKR,"Parameters", "CLK_MUX_REGs", 0x10001, 0
+;HKR,"Parameters", "EXTERNAL_CLOCK", 0x00010000 , "12.0"
+;HKR,"Parameters", "SafeRemovalIcon", 0x10001, 1
+
+[ComPort.NT.HW.AddReg]
+HKR,,"UpperFilters",0x00010000,"serenum"
+HKR,, "VID_PID_CUSTOMER", , %VID%"_"%PID%"_"%CUSTNAME%
+
+[ComPort.NT.Services]
+AddService=mos24ser_QUADPORT,2,ComPort.NT.AddService,USBSER_Event_Log_AddService
+AddService= Serenum,,Serenum_Service_Inst
+
+[ComPort.NT.CoInstallers]
+CopyFiles=CoClass.CoInstallers_CopyFiles
+AddReg = CoClass.CoInstallers_AddReg
+
+[CoClass.CoInstallers_AddReg]
+HKR,,CoInstallers32,0x00010000,"QuadCoInst_QUADPORT.dll,CoInstaller"
+
+[CoClass.CoInstallers_CopyFiles]
+;; NOTHING TO COPY
+
+[ComPort.NT.AddService]
+DisplayName    = %CUSTNAME%%mos24ser.ServiceName%
+ServiceType    = 1           ; SERVICE_KERNEL_DRIVER
+StartType      = 3           ; SERVICE_DEMAND_START
+ErrorControl   = 0           ; SERVICE_ERROR_IGNORE
+ServiceBinary  = %12%\mos24ser_QUADPORT.sys
+;LoadOrderGroup = Base
+;AddReg=ComPort.NT.Service.AddReg
+
+; -------------- Serenum Driver install section
+[Serenum_Service_Inst]
+DisplayName    = %Serenum.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\serenum.sys
+LoadOrderGroup = PNP Filter
+
+; -------------- USBSER Event Viewer Log Section
+[USBSER_Event_Log_AddService]
+AddReg = USBSER_Event_Log_AddReg
+
+[USBSER_Event_Log_AddReg]
+HKR,,EventMessageFile,0x00020000,"%%SystemRoot%%\System32\IoLogMsg.dll;%%SystemRoot%%\System32\drivers\mos24ser_QUADPORT.sys"
+HKR,,TypesSupported,0x00010001,7 
+
+
+;----------------------------------------------
+; User readable strings
+;----------------------------------------------
+[Strings]
+ProviderName="ASIX"
+MfgName="ASIX Electronics Corporation."
+DiskName="High-Speed USB MultiSerial Compound Device Installation Disc"
+MosQuadComp.DevName="High-Speed USB MultiSerial Compound Device"
+mos24ser.ServiceName=" High-Speed USB MultiSerial Device Service"
+PortsClassName = "Ports (COM)"
+MosQuadPort.ComPortName="High-Speed USB Serial Port"
+Serenum.SVCDESC = "Serenum Filter Driver"
+Enumerator = "Serial Enumerator"
+MosQuadPort.DiskName = "Install disk"
+CUSTNAME = "QUADPORT"
+VID = "9710"
+PID = "7840"
+
+;-----------------------
+; END OF FILE
+;-----------------------

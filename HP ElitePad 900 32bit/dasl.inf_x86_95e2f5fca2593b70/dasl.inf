@@ -1,0 +1,84 @@
+;
+; DASL.INF file
+;
+; Installs the HP Driver Access Service Layer
+;
+; Copyright 2012-2013 Hewlett-Packard Development Company, L.P.
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System
+ClassGuid={4D36E97D-E325-11CE-BFC1-08002BE10318}
+Provider=%Mfg%
+CatalogFile.ntx86=DASL86.cat
+DriverVer=08/08/2013,1.0.46.1
+
+
+; ================= Class section =====================
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles.x86]
+DASL86.sys  = 1,,
+hpdfe.exe   = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%Mfg%=HP
+
+[HP]
+%DeviceDesc% = DASLInstall.ntx86, ACPI\HPQ6003
+
+[DASLInstall.ntx86]
+CopyFiles=KMDriverCopy.ntx86,HPDFECopy.ntx86
+AddReg=HPDFERunKey_AddReg.ntx86
+
+[DestinationDirs]
+KMDriverCopy.ntx86=12
+HPDFECopy.ntx86=16422,Hewlett-Packard\Shared      ; under Program Files
+
+[KMDriverCopy.ntx86]
+DASL86.sys
+
+[HPDFECopy.ntx86]
+hpdfe.exe
+
+[HPDFERunKey_AddReg.ntx86]
+HKLM,%RunKey%,"hpdfe",0x00020000,"%%ProgramFiles%%\Hewlett-Packard\Shared\hpdfe.exe"
+
+;-------------- Service installation
+[DASLInstall.ntx86.Services]
+AddService = DASL,%SPSVCINST_ASSOCSERVICE%, DASL_Service_Inst.ntx86, DASL_EventLog_Inst86
+
+; -------------- DASL driver install sections
+[DASL_Service_Inst.ntx86]
+DisplayName    = %DASL.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\DASL86.sys
+LoadOrderGroup = Extended Base
+
+[DASL_EventLog_Inst86] 
+AddReg = DASL_EventLog_Inst86.AddReg 
+ 
+[DASL_EventLog_Inst86.AddReg] 
+HKR,,EventMessageFile,%REG_EXPAND_SZ%,"%%SystemRoot%%\System32\drivers\DASL86.sys" 
+HKR,,TypesSupported,%REG_DWORD%,7
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+Mfg = "Hewlett-Packard"
+ClassName="System"
+DiskName = "DASL Installation Disk"
+DeviceDesc = "HP Driver Access Service Layer"
+DASL.SVCDESC = "DASL Service"
+RunKey = "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+
+REG_EXPAND_SZ          = 0x00020000
+REG_DWORD              = 0x00010001
